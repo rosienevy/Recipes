@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>My Recipes</title>
+<title>Rosie's Recipes</title>
 <style>
 :root{--bg:#fbf7f2;--card:#fff;--text:#2a2019;--muted:#7d6f63;--accent:#c4552d;--chip:#f1e8de;--line:#e8dccf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1512;--card:#261e19;--text:#f4ebe2;--muted:#b5a597;--accent:#f0805a;--chip:#372b23;--line:#493a30}}
@@ -77,7 +77,7 @@ const fmt=n=>{n=Math.round(n*100)/100;return String(n)};
 
 function list(){
  const f=RECIPES.filter(r=>(cat==='All'||r.cat===cat)&&(r.title+' '+r.ing.map(i=>i[2]).join(' ')).toLowerCase().includes(q.toLowerCase()));
- app.innerHTML=`<h1>My Recipes</h1><p class="sub">Go-to dishes, one tap away</p>
+ app.innerHTML=`<h1>Rosie's Recipes</h1><p class="sub">An attempt to have access to my go-to reciples using NFC tag</p>
  <input type="search" id="s" placeholder="Search recipes or ingredients" value="${q.replace(/"/g,'&quot;')}">
  <div class="chips">${cats.map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${c}">${c}</button>`).join('')}</div>
  <div class="grid">${f.map(r=>`<a class="card" href="#${r.id}"><div class="e">${r.emoji}</div><h2>${r.title}</h2><div class="meta">${r.cat} · ${r.time}</div></a>`).join('')||'<p class="empty">No recipes found.</p>'}</div>`;
