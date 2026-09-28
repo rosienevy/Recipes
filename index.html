@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Recipes</title>
+<style>
+:root{--bg:#fbf7f2;--card:#fff;--text:#2a2019;--muted:#7d6f63;--accent:#c4552d;--chip:#f1e8de;--line:#e8dccf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1512;--card:#261e19;--text:#f4ebe2;--muted:#b5a597;--accent:#f0805a;--chip:#372b23;--line:#493a30}}
+:root[data-theme="dark"]{--bg:#1a1512;--card:#261e19;--text:#f4ebe2;--muted:#b5a597;--accent:#f0805a;--chip:#372b23;--line:#493a30}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:720px;margin:0 auto;padding:22px 16px 56px}
+h1,h2{font-family:Georgia,'Times New Roman',serif;margin:0}
+h1{font-size:30px}
+.sub{color:var(--muted);margin:2px 0 18px;font-size:14px}
+input[type=search]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
+.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--text);padding:7px 14px;border-radius:999px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.card .e{font-size:38px}
+.card h2{font-size:18px;margin:6px 0 2px}
+.meta{color:var(--muted);font-size:13px}
+.back{display:inline-block;margin-bottom:14px;color:var(--accent);text-decoration:none;font-size:15px}
+.hero{font-size:56px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:16px 0}
+.scale{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.scale button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--chip);color:var(--text);font-size:20px;cursor:pointer}
+ul{list-style:none;padding:0;margin:0}
+li.i{padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+li.i:last-child{border:0}
+li.i.done{opacity:.4;text-decoration:line-through}
+li.i b{color:var(--accent)}
+ol{padding-left:22px;margin:0}
+ol li{margin-bottom:12px}
+.note{color:var(--muted);font-size:14px;font-style:italic}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ============ EDIT YOUR RECIPES HERE ============
+   ing: [amount, unit, name]  (leave unit '' for things like eggs)
+   Copy a recipe block, change the details, keep the commas. */
+const RECIPES=[
+{id:'pancakes',title:'Fluffy Pancakes',emoji:'🥞',cat:'Breakfast',time:'20 min',serves:4,
+ ing:[[200,'g','plain flour'],[2,'tsp','baking powder'],[1,'tbsp','sugar'],[300,'ml','milk'],[2,'','eggs'],[30,'g','melted butter']],
+ steps:['Whisk the flour, baking powder and sugar in a bowl.','Beat the eggs into the milk, then mix in the melted butter.','Pour wet into dry and stir until just combined. A few lumps are fine.','Cook ladlefuls in a lightly buttered pan over medium heat, about 2 minutes each side.'],
+ note:'Rest the batter for 5 minutes for extra fluffiness.'},
+{id:'tomato-pasta',title:'Easy Tomato Pasta',emoji:'🍝',cat:'Dinner',time:'25 min',serves:2,
+ ing:[[200,'g','spaghetti'],[2,'tbsp','olive oil'],[2,'','garlic cloves'],[400,'g','tin chopped tomatoes'],[1,'tsp','sugar'],[1,'handful','fresh basil']],
+ steps:['Boil the pasta in well-salted water until al dente.','Gently fry the sliced garlic in the oil for 1 minute.','Add the tomatoes and sugar, then simmer for 15 minutes.','Toss the drained pasta in the sauce and finish with basil.'],
+ note:'Save a mug of pasta water to loosen the sauce.'},
+{id:'overnight-oats',title:'Overnight Oats',emoji:'🥣',cat:'Breakfast',time:'5 min + overnight',serves:1,
+ ing:[[50,'g','rolled oats'],[120,'ml','milk'],[2,'tbsp','yoghurt'],[1,'tsp','honey'],[1,'handful','berries']],
+ steps:['Stir the oats, milk, yoghurt and honey together in a jar.','Cover and chill overnight.','Top with berries and eat cold or warmed.'],note:''}
+];
+/* ================================================ */
+
+const app=document.getElementById('app');
+let q='',cat='All',serv=null,rid=null;
+const cats=['All',...new Set(RECIPES.map(r=>r.cat))];
+const fmt=n=>{n=Math.round(n*100)/100;return String(n)};
+
+function list(){
+ const f=RECIPES.filter(r=>(cat==='All'||r.cat===cat)&&(r.title+' '+r.ing.map(i=>i[2]).join(' ')).toLowerCase().includes(q.toLowerCase()));
+ app.innerHTML=`<h1>My Recipes</h1><p class="sub">Go-to dishes, one tap away</p>
+ <input type="search" id="s" placeholder="Search recipes or ingredients" value="${q.replace(/"/g,'&quot;')}">
+ <div class="chips">${cats.map(c=>`<button class="chip ${c===cat?'on':''}" data-c="${c}">${c}</button>`).join('')}</div>
+ <div class="grid">${f.map(r=>`<a class="card" href="#${r.id}"><div class="e">${r.emoji}</div><h2>${r.title}</h2><div class="meta">${r.cat} · ${r.time}</div></a>`).join('')||'<p class="empty">No recipes found.</p>'}</div>`;
+ const s=document.getElementById('s');
+ s.oninput=e=>{q=e.target.value;const p=s.selectionStart;list();const n=document.getElementById('s');n.focus();n.setSelectionRange(p,p)};
+ app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cat=b.dataset.c;list()});
+}
+
+function detail(r){
+ if(rid!==r.id){rid=r.id;serv=r.serves}
+ const k=serv/r.serves;
+ app.innerHTML=`<a class="back" href="#">← All recipes</a>
+ <div class="hero">${r.emoji}</div><h1>${r.title}</h1><p class="sub">${r.cat} · ${r.time}</p>
+ <div class="box"><div class="scale"><button id="m" aria-label="Fewer servings">−</button><b>Serves ${serv}</b><button id="p" aria-label="More servings">+</button></div>
+ <ul>${r.ing.map(i=>`<li class="i"><b>${fmt(i[0]*k)}${i[1]?' '+i[1]:''}</b> ${i[2]}</li>`).join('')}</ul></div>
+ <div class="box"><h2>Method</h2><br><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>${r.note?`<p class="note">Tip: ${r.note}</p>`:''}</div>`;
+ document.getElementById('m').onclick=()=>{if(serv>1){serv--;detail(r)}};
+ document.getElementById('p').onclick=()=>{serv++;detail(r)};
+ app.querySelectorAll('li.i').forEach(li=>li.onclick=()=>li.classList.toggle('done'));
+}
+
+function route(){
+ const id=decodeURIComponent(location.hash.slice(1));
+ const r=RECIPES.find(x=>x.id===id);
+ window.scrollTo(0,0);
+ r?detail(r):list();
+}
+window.addEventListener('hashchange',route);
+route();
+</script>
+</body>
+</html>
